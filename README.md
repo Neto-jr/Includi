@@ -41,7 +41,7 @@ e a URL de conexão em `backend/src/main/resources/application.properties`.
 No terminal do VS Code, execute:
 
 ```powershell
-cd "C:\Users\JOCA\Desktop\Fundação FAT\Projeto Includi\backend"
+cd "C:\Users\jrn\Desktop\Projeto Includi\backend"
 .\mvnw.cmd spring-boot:run
 ```
 
@@ -52,7 +52,7 @@ A API inicia normalmente em `http://localhost:8080`.
 Abra outro terminal e execute:
 
 ```powershell
-cd "C:\Users\JOCA\Desktop\Fundação FAT\Projeto Includi\frontend"
+cd "C:\Users\jrn\Desktop\Projeto Includi\frontend"
 npm install
 npm run dev
 ```
