@@ -1,7 +1,10 @@
+<<<<<<< HEAD
 Boa, Neto! 👊  
 Seu `README.md` já está ótimo, mas dá pra deixá-lo mais visual e atrativo usando ícones (via emojis). Isso ajuda a destacar seções e tecnologias. Aqui vai uma versão melhorada:
 
 ```markdown
+=======
+>>>>>>> 5fae3896dda0c28c73af2f22b33bc6bd36fd878c
 # 🚀 Includi
 
 Plataforma que busca conectar trabalhadores autônomos de baixa renda e pessoas neurodivergentes 
