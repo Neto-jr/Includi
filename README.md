@@ -78,5 +78,4 @@ Antes de publicar em produção, é necessário:
 ## 📌 Status
 
 Projeto acadêmico em desenvolvimento.
-```
 
