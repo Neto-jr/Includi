@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import axios from "axios";
 import "./App.css";
@@ -8,9 +7,14 @@ import AdminUsuarios from "./components/AdminUsuarios";
 const API_URL = "http://localhost:8080/api";
 
 function App() {
-  if (window.location.pathname === "/admin") {
-    return <AdminUsuarios />;
-  }
+  const [tema, setTema] = useState(() => {
+    try {
+      return localStorage.getItem("includi-tema") || "claro";
+    } catch {
+      return "claro";
+    }
+  });
+
   const [cursos, setCursos] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState(false);
@@ -20,10 +24,24 @@ function App() {
   const [erroVagas, setErroVagas] = useState(false);
 
   useEffect(() => {
+    document.documentElement.dataset.tema = tema;
+
+    try {
+      localStorage.setItem("includi-tema", tema);
+    } catch {
+      // O site continua funcionando se o armazenamento estiver indisponível.
+    }
+  }, [tema]);
+
+  useEffect(() => {
+    if (window.location.pathname === "/admin") {
+      return;
+    }
+
     axios
       .get(`${API_URL}/cursos`)
       .then((resposta) => {
-        setCursos(resposta.data);
+        setCursos(Array.isArray(resposta.data) ? resposta.data : []);
       })
       .catch((error) => {
         console.error("Erro ao carregar cursos:", error);
@@ -32,13 +50,11 @@ function App() {
       .finally(() => {
         setCarregando(false);
       });
-  }, []);
 
-  useEffect(() => {
     axios
       .get(`${API_URL}/vagas`)
       .then((resposta) => {
-        setVagas(resposta.data);
+        setVagas(Array.isArray(resposta.data) ? resposta.data : []);
       })
       .catch((error) => {
         console.error("Erro ao carregar vagas:", error);
@@ -49,30 +65,57 @@ function App() {
       });
   }, []);
 
+  if (window.location.pathname === "/admin") {
+    return <AdminUsuarios />;
+  }
+
+  const alternarTema = () => {
+    setTema((atual) => (atual === "claro" ? "escuro" : "claro"));
+  };
+
   return (
     <div className="includi">
       <header className="cabecalho">
-        <a className="logo" href="#inicio">
+        <a className="logo" href="#inicio" aria-label="Includi - início">
           Includi<span>.</span>
         </a>
 
-        <nav className="menu">
+        <nav className="menu" aria-label="Navegação principal">
           <a href="#inicio">Início</a>
           <a href="#sobre">Sobre</a>
           <a href="#cursos">Cursos</a>
           <a href="#vagas">Vagas</a>
         </nav>
 
-        <a className="botao botao-menu" href="#vagas">
-          Ver oportunidades
-        </a>
+        <div className="cabecalho-acoes">
+          <button
+            className="botao-tema"
+            type="button"
+            onClick={alternarTema}
+            aria-label={
+              tema === "claro"
+                ? "Ativar tema escuro"
+                : "Ativar tema claro"
+            }
+            title={tema === "claro" ? "Ativar tema escuro" : "Ativar tema claro"}
+          >
+            <span aria-hidden="true">{tema === "claro" ? "🌙" : "☀️"}</span>
+            <span className="texto-tema">
+              {tema === "claro" ? "Modo escuro" : "Modo claro"}
+            </span>
+          </button>
+
+          <a className="botao botao-menu" href="#vagas">
+            Ver oportunidades
+          </a>
+        </div>
       </header>
 
       <main>
         <section className="hero" id="inicio">
           <div className="hero-conteudo">
             <span className="etiqueta">
-              Oportunidades para todos
+              <span aria-hidden="true">✦</span> Oportunidades para todos
             </span>
 
             <h1>
@@ -88,7 +131,7 @@ function App() {
 
             <div className="hero-acoes">
               <a className="botao botao-principal" href="#vagas">
-                Explorar oportunidades
+                Explorar oportunidades <span aria-hidden="true">↗</span>
               </a>
 
               <a className="botao botao-secundario" href="#cursos">
@@ -97,25 +140,36 @@ function App() {
             </div>
 
             <div className="hero-nota">
+              <span aria-hidden="true">✓</span>
               Inclusão, autonomia e trabalho digno.
             </div>
           </div>
 
-          <div className="hero-card">
-            <div className="icone-destaque">✦</div>
-            <span className="hero-card-legenda">
-              Seu próximo passo começa aqui
-            </span>
-            <h2>Talentos diferentes. Oportunidades reais.</h2>
-            <p>
-              Desenvolva suas habilidades, descubra caminhos
-              profissionais e amplie suas possibilidades.
-            </p>
+          <div className="hero-visual">
+            <img
+              className="hero-imagem"
+              src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1100&q=85"
+              alt="Profissionais colaborando em um ambiente de trabalho"
+            />
 
-            <div className="mini-etiquetas">
-              <span>Capacitação</span>
-              <span>Inclusão</span>
-              <span>Autonomia</span>
+            <div className="hero-card">
+              <div className="icone-destaque" aria-hidden="true">
+                ✦
+              </div>
+              <span className="hero-card-legenda">
+                Seu próximo passo começa aqui
+              </span>
+              <h2>Talentos diferentes. Oportunidades reais.</h2>
+              <p>
+                Desenvolva suas habilidades, descubra caminhos
+                profissionais e amplie suas possibilidades.
+              </p>
+
+              <div className="mini-etiquetas">
+                <span>Capacitação</span>
+                <span>Inclusão</span>
+                <span>Autonomia</span>
+              </div>
             </div>
           </div>
         </section>
@@ -133,7 +187,9 @@ function App() {
 
           <div className="beneficios">
             <article className="beneficio">
-              <div className="beneficio-icone">↗</div>
+              <div className="beneficio-icone" aria-hidden="true">
+                ↗
+              </div>
               <h3>Trabalho e renda</h3>
               <p>
                 Descubra oportunidades para desenvolver sua carreira
@@ -142,7 +198,9 @@ function App() {
             </article>
 
             <article className="beneficio">
-              <div className="beneficio-icone">▣</div>
+              <div className="beneficio-icone" aria-hidden="true">
+                ▣
+              </div>
               <h3>Aprendizado contínuo</h3>
               <p>
                 Amplie seus conhecimentos e prepare-se para novos
@@ -151,7 +209,9 @@ function App() {
             </article>
 
             <article className="beneficio">
-              <div className="beneficio-icone">♡</div>
+              <div className="beneficio-icone" aria-hidden="true">
+                ♡
+              </div>
               <h3>Inclusão de verdade</h3>
               <p>
                 Incentivamos ambientes profissionais acessíveis,
@@ -173,13 +233,13 @@ function App() {
           </div>
 
           {carregando ? (
-            <p className="mensagem">Carregando cursos...</p>
+            <p className="mensagem" role="status">
+              Carregando cursos...
+            </p>
           ) : erro ? (
-            <div className="mensagem">
+            <div className="mensagem" role="alert">
               <p>Não foi possível carregar os cursos da API.</p>
-              <p>
-                Confira se o backend Java está rodando na porta 8080.
-              </p>
+              <p>Confira se o backend Java está rodando na porta 8080.</p>
             </div>
           ) : cursos.length === 0 ? (
             <div className="mensagem">
@@ -190,7 +250,10 @@ function App() {
             <div className="grade-cursos">
               {cursos.map((curso) => (
                 <article className="curso-card" key={curso.id}>
-                  <div className="curso-icone">▤</div>
+                  <div className="curso-icone" aria-hidden="true">
+                    ▤
+                  </div>
+
                   <span className="curso-categoria">Capacitação</span>
                   <h3>{curso.titulo}</h3>
                   <p>{curso.descricao}</p>
@@ -218,15 +281,10 @@ function App() {
           )}
         </section>
 
-
         <section className="vagas secao" id="vagas">
           <div className="vagas-conteudo">
-            <span className="sobretitulo">
-              Seu talento tem valor
-            </span>
-
+            <span className="sobretitulo">Seu talento tem valor</span>
             <h2>Oportunidades profissionais</h2>
-
             <p>
               Confira as oportunidades cadastradas pelas empresas
               participantes do Includi.
@@ -234,9 +292,11 @@ function App() {
           </div>
 
           {carregandoVagas ? (
-            <p className="mensagem">Carregando oportunidades...</p>
+            <p className="mensagem" role="status">
+              Carregando oportunidades...
+            </p>
           ) : erroVagas ? (
-            <p className="mensagem">
+            <p className="mensagem" role="alert">
               Não foi possível carregar as vagas.
               Verifique se o backend Java está funcionando.
             </p>
@@ -247,8 +307,10 @@ function App() {
           ) : (
             <div className="grade-cursos">
               {vagas.map((vaga) => (
-                <article className="curso-card" key={vaga.id}>
-                  <div className="curso-icone">↗</div>
+                <article className="curso-card vaga-card" key={vaga.id}>
+                  <div className="curso-icone" aria-hidden="true">
+                    ↗
+                  </div>
 
                   <span className="curso-categoria">
                     {vaga.status === "ABERTA"
@@ -257,7 +319,6 @@ function App() {
                   </span>
 
                   <h3>{vaga.titulo}</h3>
-
                   <p>{vaga.descricao}</p>
 
                   <div className="vaga-empresa">
@@ -266,10 +327,12 @@ function App() {
                   </div>
 
                   <div className="vaga-remuneracao">
-                    R$ {Number(vaga.remuneracao).toLocaleString("pt-BR", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2
-                    })}
+                    {vaga.remuneracao != null
+                      ? Number(vaga.remuneracao).toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      })
+                      : "Remuneração não informada"}
                   </div>
 
                   <span className="vaga-status">
@@ -280,8 +343,8 @@ function App() {
             </div>
           )}
         </section>
-        <CadastroUsuario />
 
+        <CadastroUsuario />
       </main>
 
       <footer className="rodape">
